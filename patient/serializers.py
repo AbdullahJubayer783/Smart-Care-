@@ -3,10 +3,26 @@ from .models import Patient
 from django.contrib.auth.models import User
 
 class PatientSerializers(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(many=False)
     class Meta:
         model = Patient
-        fields = '__all__'
+        fields = ['image','mobile_no','user']
+
+# class PatientSerializers(serializers.ModelSerializer):
+    
+#     class Meta:
+#         model = Patient
+#         fields = ['image','mobile_no','user']
+#     def save(self ):
+#         image = self.validated_data['image']
+#         mobile_no = self.validated_data['mobile_no']
+#         # request = self.context.get('request', None)
+#         # if request:
+#         #     user = request.user
+#         Patient.objects.create(
+#             user = self.request.user,
+#             mobile_no = mobile_no,
+#             image = image,
+#         )
 
 class RegistrationSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(required=True)
@@ -24,8 +40,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
         if password != confirm_password:
             raise serializers.ValidationError({'error':"Two password field dosen't matched..!"})
-        # if User.objects.filter(email=email).exists():
-        #     raise serializers.ValidationError({'error':"Email already exist..!"})
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError({'error':"Email already exist..!"})
         
         acc = User(username=username,first_name=first_name,last_name=last_name,email=email)
         acc.is_active = False

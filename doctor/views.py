@@ -4,6 +4,7 @@ from . import serializers
 from rest_framework import filters , pagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly 
 from . import models
+# from custom_user
 # Create your views here.
 
 class DoctorPagination(pagination.PageNumberPagination):
@@ -39,6 +40,18 @@ class SpecializationViewset(viewsets.ModelViewSet):
     queryset = models.Specialization.objects.all()
     serializer_class = serializers.SpecializationSerializers
 
+class BuiltInUserViewset(viewsets.ModelViewSet):
+    queryset = models.User.objects.all()
+    serializer_class = serializers.BuiltInUser
+
+class ReviewsForSpacificeDoctor(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        doctor_id = request.query_params.get('doctor_id')
+        if doctor_id:
+            return queryset.filter(doctor=doctor_id)
+        return queryset
+    
 class ReviewViewset(viewsets.ModelViewSet):
     queryset = models.Review.objects.all()
     serializer_class = serializers.ReviewSerializers
+    filter_backends = [ReviewsForSpacificeDoctor]

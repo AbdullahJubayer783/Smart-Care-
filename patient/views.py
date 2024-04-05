@@ -13,11 +13,45 @@ from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth.models import User
+from rest_framework import filters
 # Create your views here.
+
+
+class PatientForSpacificUser(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        user_id = request.query_params.get('user_id')
+        if user_id:
+            return queryset.filter(user=user_id)
+        return queryset
+    
 
 class PatientViewsets(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializers
+    filter_backends = [PatientForSpacificUser]
+
+
+# class PatientViewsets(APIView):
+#     def post(self,request):
+#         serializers = PatientSerializers(data=request.data)
+#         if serializers.is_valid():
+#             print(serializers.validated_data)
+#             serializers.save(request)
+#             return Response("user info saved successfully")
+#         return Response("invalide credential")
+    
+#     def get(self,request,id=None):
+#         obj = Patient.objects.all()
+#         if id:
+#             obj = Patient.objects.filter(id=id)
+#         user_id = request.query_params.get('user_id')
+#         if user_id:
+#             obj = obj.filter(user=user_id)
+        
+#         serializer = PatientSerializers(obj, many=True)
+#         return Response(serializer.data)
+        
+
 
 class RegistrationAPIView(APIView):
     serializer_class = RegistrationSerializer
